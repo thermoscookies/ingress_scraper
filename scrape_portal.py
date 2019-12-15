@@ -248,11 +248,11 @@ if __name__ == "__main__":
                 intellink = "https://intel.ingress.com/intel?ll=" + str(lat) + "," + str(lon) + "&z=17&pll=" + str(lat) + "," + str(lon)
                 navigation = ("[Google Maps](https://www.google.com/maps/search/?api=1&query=" + str(lat) + "," + str(lon) + ") | [Intel](https://intel.ingress.com/intel?ll=" + str(lat) + "," + str(lon) + "&z=17&pll=" + str(lat) + "," + str(lon) + ")")
                 webhook = DiscordWebhook(url=config['whurllvl'])
-                color = 0xFF8C00
-                if p_fac == 'E': color = 0x008000
-                if p_fac == 'R': color = 0x1E90FF
-                embed = DiscordEmbed(title=all_portal_details[idx][portal_name], description='Level: {}\n{}'.format(p_lvl,navigation), color=color)
+                if p_fac == 'E': color, team = 0x008000, 'ENL'
+                if p_fac == 'R': color, team = 0x1E90FF, 'RES'
+                embed = DiscordEmbed(title=all_portal_details[idx][portal_name], description='Level: {} {}\n{}'.format(p_lvl,team,navigation), color=color)
                 embed.set_thumbnail(url=p_url)
+                embed.set_footer(text=datetime.datetime.now().strftime("%c"))
                 webhook.add_embed(embed)
                 response = webhook.execute()
 
