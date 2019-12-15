@@ -5,7 +5,7 @@ from pymysql import connect
 import math
 import sys
 import datetime
-from discord_webhook import DiscordWebhook
+from discord_webhook import DiscordWebhook, DiscordEmbed
 
 # Python2 and Python3 compatibility
 try:
@@ -92,8 +92,13 @@ def create_config(config_path):
     config['whenable'] = config_raw.getboolean(
         'Discord',
         'ENABLED_WH')
+    config['whurllvl'] = config_raw.get(
+        'Discord',
+        'WEBHOOKLEVEL')
+    config['whlvlenable'] = config_raw.getboolean(
+        'Discord',
+        'ENABLED_WHLVL')
     return config
-
 
 def print_configs(config):
     """Print the used config."""
@@ -225,6 +230,8 @@ if __name__ == "__main__":
             lon = (all_portal_details[idx][3])/1e6
             p_name = (all_portal_details[idx][portal_name]).encode('utf-8')
             p_url = all_portal_details[idx][portal_url]
+            p_lvl = all_portal_details[idx][4]
+            p_fac = all_portal_details[idx][1]
             updated_ts = datetime.datetime.now().strftime("%s")
             insert_portal_args = (val,  p_name,  p_url, lat, lon, updated_ts, updated_ts, updated_ts, p_name,  p_url, lat, lon)
             try:
@@ -237,6 +244,17 @@ if __name__ == "__main__":
                 print("#"*50)
                 print("could not put in db {0} {1} ".format(val, p_name))
                 print("#"*50)
+            if config['whlvlenable'] and p_lvl > 6:
+                intellink = "https://intel.ingress.com/intel?ll=" + str(lat) + "," + str(lon) + "&z=17&pll=" + str(lat) + "," + str(lon)
+                navigation = ("[Google Maps](https://www.google.com/maps/search/?api=1&query=" + str(lat) + "," + str(lon) + ") | [Intel](https://intel.ingress.com/intel?ll=" + str(lat) + "," + str(lon) + "&z=17&pll=" + str(lat) + "," + str(lon) + ")")
+                webhook = DiscordWebhook(url=config['whurllvl'])
+                color = 0xFF8C00
+                if p_fac == 'E': color = 0x008000
+                if p_fac == 'R': color = 0x1E90FF
+                embed = DiscordEmbed(title=all_portal_details[idx][portal_name], description='Level: {}\n{}'.format(p_lvl,navigation), color=color)
+                embed.set_thumbnail(url=p_url)
+                webhook.add_embed(embed)
+                response = webhook.execute()
 
     if args.all_poi:
         
